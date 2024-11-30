@@ -49,12 +49,12 @@ class BuscarCartaView(APIView):
 
 
 class DeckDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Deck.objects.all()
+    queryset = Deck.objects.prefetch_related('deckcard_set__card')
     serializer_class = DeckSerializer
-    
-    def get_queryset(self):
-        # Solo permite acceder al deck del usuario actual
-        return self.queryset()
+
+    def perform_update(self, serializer):
+        serializer.save()
+
 
 
 class DeckCreateView(generics.CreateAPIView):
@@ -70,13 +70,10 @@ class DeckCreateView(generics.CreateAPIView):
         serializer.save()
 
 class DeckListCreateView(generics.ListCreateAPIView):
-    queryset = Deck.objects.all()
+    queryset = Deck.objects.prefetch_related('deckcard_set__card')
     serializer_class = DeckSerializer
 
-    def get_queryset(self):
-        # Filtra los decks sin asociarlos a un usuario, ya que no hay un usuario vinculado
-        return self.queryset  # Eliminar los paréntesis
-
     def perform_create(self, serializer):
-        # Solo guarda el deck sin asociarlo a un usuario
+        # Simplemente guarda el deck con las cartas
         serializer.save()
+
