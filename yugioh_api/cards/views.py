@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
-from rest_framework import generics
-from .models import Card
-from .serializers import CardSerializer
+from rest_framework import generics, permissions
+from .models import Card, Deck
+from .serializers import CardSerializer, DeckSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -46,3 +46,37 @@ class BuscarCartaView(APIView):
         paginated_cartas = paginator.paginate_queryset(cartas, request)
         serializer = CardSerializer(paginated_cartas, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+
+class DeckDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Deck.objects.all()
+    serializer_class = DeckSerializer
+    
+    def get_queryset(self):
+        # Solo permite acceder al deck del usuario actual
+        return self.queryset()
+
+
+class DeckCreateView(generics.CreateAPIView):
+    queryset = Deck.objects.all()
+    serializer_class = DeckSerializer
+    
+    def get_queryset(self):
+        # Solo devuelve los decks del usuario autenticado
+        return self.queryset()
+    
+    def perform_create(self, serializer):
+        # Asigna el usuario actual al deck
+        serializer.save()
+
+class DeckListCreateView(generics.ListCreateAPIView):
+    queryset = Deck.objects.all()
+    serializer_class = DeckSerializer
+
+    def get_queryset(self):
+        # Filtra los decks sin asociarlos a un usuario, ya que no hay un usuario vinculado
+        return self.queryset  # Eliminar los paréntesis
+
+    def perform_create(self, serializer):
+        # Solo guarda el deck sin asociarlo a un usuario
+        serializer.save()
