@@ -17,7 +17,7 @@ class CardDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CardSerializer
 
 class CustomPagination(PageNumberPagination):
-    page_size = 10  # Número de cartas por página
+    page_size = 12  # Número de cartas por página
     page_size_query_param = 'page_size'
     max_page_size = 50
 
